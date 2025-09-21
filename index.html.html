@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Career Prism — Polished Prototype</title>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- anime.js for animations -->
+<script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+
+<!-- Fonts (Google) -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#0b1020;
+    --card: rgba(255,255,255,0.03);
+    --muted:#9aa6bd;
+    --glass-border: rgba(255,255,255,0.04);
+    --accentA: #7c3aed;
+    --accentB: #06b6d4;
+    --accentGradient: linear-gradient(135deg,var(--accentA),var(--accentB));
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --glass: rgba(255,255,255,0.02);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#e6eef8;background:
+    radial-gradient(600px 300px at 0% 10%, rgba(124,58,237,0.07), transparent),
+    radial-gradient(600px 300px at 100% 90%, rgba(6,182,212,0.04), transparent),
+    var(--bg);
+    -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  }
+
+  /* Page layout */
+  .container{max-width:1200px;margin:28px auto;padding:18px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;color:white}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:56px;height:56px;border-radius:12px;background:var(--accentGradient);display:flex;align-items:center;justify-content:center;font-weight:800;color:white;box-shadow:0 12px 30px rgba(124,58,237,0.14)}
+  h1{margin:0;font-size:20px}
+  header p{margin:0;color:var(--muted);font-size:13px}
+
+  /* Hero */
+  .hero{margin-top:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;padding:24px;border:1px solid var(--glass-border);display:grid;grid-template-columns:1fr 360px;gap:18px}
+  .hero-left h2{margin:0;color:white;font-size:26px}
+  .hero-left p{color:var(--muted);margin-top:8px}
+  .hero-cta{margin-top:14px;display:flex;gap:10px}
+  .btn{padding:12px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
+  .btn-primary{background:var(--accentGradient);color:white;box-shadow:0 12px 30px rgba(124,58,237,0.12)}
+  .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+
+  /* right hero card */
+  .hero-card{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));padding:14px;border-radius:12px;border:1px solid var(--glass-border)}
+  .small{font-size:13px;color:var(--muted)}
+
+  /* main layout */
+  .grid{display:grid;grid-template-columns: 1fr 360px;gap:18px;margin-top:18px}
+  main .card{background:var(--card);border-radius:12px;padding:14px;border:1px solid var(--glass-border);box-shadow:0 8px 30px rgba(2,6,23,0.6)}
+  .card h3{margin:0;color:white}
+  .sub{color:var(--muted);font-size:13px;margin-top:6px}
+
+  /* chips */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .chip{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.03);color:white;font-weight:600;display:flex;gap:8px;align-items:center}
+  .chip .x{background:rgba(255,255,255,0.03);padding:3px 7px;border-radius:8px;color:var(--muted);cursor:pointer}
+
+  .input-row{display:flex;gap:10px;margin-top:12px}
+  input[type="text"]{flex:1;padding:10px;border-radius:10px;border:1px solid var(--glass-border);background:transparent;color:white}
+  .tiny{font-size:13px;padding:8px 10px;border-radius:8px}
+
+  /* career cards */
+  .career-list{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px}
+  .career{display:flex;justify-content:space-between;gap:12px;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);align-items:center;transition:transform .18s,box-shadow .18s;cursor:pointer;background:linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00))}
+  .career:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(4,6,30,0.6)}
+  .career .meta h4{margin:0;color:white}
+  .career .meta p{margin:6px 0 0 0;color:var(--muted);font-size:13px}
+  .pct{font-weight:800;color:white;font-size:16px}
+
+  /* roadmap timeline */
+  .timeline{display:flex;gap:12px;overflow-x:auto;padding:8px;margin-top:12px}
+  .step{min-width:220px;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00))}
+  .step h4{margin:0;color:white}
+  .muted2{color:var(--muted);font-size:13px;margin-top:8px}
+
+  /* gamification */
+  .profile{display:flex;align-items:center;gap:12px}
+  .avatar{width:64px;height:64px;border-radius:12px;background:var(--accentGradient);display:flex;align-items:center;justify-content:center;font-weight:800;color:white;font-size:20px}
+  .progress{height:12px;background:rgba(255,255,255,0.02);border-radius:999px;overflow:hidden}
+  .progress > i{display:block;height:100%;width:20%;background:linear-gradient(90deg,#22c55e,#06b6d4)}
+
+  /* badges */
+  .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .badge{padding:8px 10px;border-radius:8px;background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);color:white;font-weight:700;font-size:13px}
+
+  /* market insights */
+  .market-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+  .mini{height:120px}
+
+  footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px;padding-bottom:30px}
+
+  /* small screens */
+  @media (max-width:1000px){
+    .hero{grid-template-columns:1fr;padding:16px}
+    .grid{grid-template-columns:1fr;gap:12px}
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo">CP</div>
+        <div>
+          <h1>Career Prism</h1>
+          <p class="small">Personalized AI Career Advisor — prototype</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="btn btn-ghost tiny" id="githubBtn" title="Open repo (mock)">View Repo</button>
+        <button class="btn btn-primary tiny" id="startBtn">Start Your Journey</button>
+      </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-left">
+        <h2>Find the right career path — based on your skills, goals & market demand</h2>
+        <p class="small">Interactive roadmap generator • Gamified skill tracker • Market insights</p>
+        <div class="hero-cta">
+          <button class="btn btn-primary" id="ctaStart">Get Started</button>
+          <button class="btn btn-ghost" id="ctaDemo">Watch Demo</button>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:16px;align-items:center">
+          <div style="padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03)">
+            <div style="font-weight:800;color:white">Live Preview</div>
+            <div class="muted small">Prototype</div>
+          </div>
+          <div style="padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03)">
+            <div style="font-weight:800;color:white" id="heroXp">0 XP</div>
+            <div class="muted small">Earn XP by adding skills & completing tasks</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-weight:800;color:white">Quick Stats</div>
+            <div class="muted small">Saved locally via LocalStorage</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-weight:800;color:white" id="statSkills">0 skills</div>
+            <div class="muted small">Skills added</div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button class="btn tiny btn-primary" id="saveBtn2">Save</button>
+          <button class="btn tiny btn-ghost" id="loadBtn2">Load</button>
+          <button class="btn tiny btn-ghost" id="resetBtn2">Reset</button>
+        </div>
+
+        <div style="margin-top:12px">
+          <div class="small muted">Top trending</div>
+          <div style="margin-top:8px" id="trendingMini">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main grid -->
+    <div class="grid">
+      <main>
+        <!-- Skills -->
+        <div class="card">
+          <h3>Skill Mapping Dashboard</h3>
+          <div class="sub">Add or quick-fill your skills. Visual radar updates instantly.</div>
+
+          <div class="chips" id="skillChips"></div>
+
+          <div class="input-row">
+            <input id="skillInput" placeholder="Add a skill (e.g., Python)" />
+            <button class="btn btn-primary tiny" id="addSkillBtn">Add Skill</button>
+            <button class="btn btn-ghost tiny" id="quickClearBtn">Clear</button>
+          </div>
+
+          <div style="display:flex;gap:12px;margin-top:14px;align-items:center">
+            <div style="flex:1"><canvas id="radarChart" height="160"></canvas></div>
+            <div style="width:160px;text-align:center">
+              <div style="font-weight:800;color:white;font-size:18px" id="skillScore">—</div>
+              <div class="muted small">Skill score</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="card">
+          <h3>AI-Powered Career Recommendations</h3>
+          <div class="sub">Mock AI uses a rule-based skill-match algorithm. Click a card to generate a roadmap.</div>
+
+          <div class="career-list" id="careerList"></div>
+
+          <div style="display:flex;gap:10px;margin-top:12px">
+            <button class="btn btn-primary tiny" id="autoPick">Auto Pick Best Fit</button>
+            <button class="btn btn-ghost tiny" id="exportJsonBtn">Export Recommendations</button>
+          </div>
+        </div>
+
+        <!-- Roadmap -->
+        <div class="card">
+          <h3>Interactive Roadmap Generator</h3>
+          <div class="sub">Editable timeline — add steps and export your personal roadmap.</div>
+
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <input id="roadInput" placeholder="Add roadmap step (e.g., Week 1: Learn SQL)" />
+            <button class="btn btn-primary tiny" id="roadAddBtn">Add</button>
+          </div>
+
+          <div class="timeline" id="timeline"></div>
+
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn btn-ghost tiny" id="exportRoadBtn">Export Roadmap</button>
+            <button class="btn btn-ghost tiny" id="clearRoadBtn">Clear Roadmap</button>
+          </div>
+        </div>
+
+        <!-- Gamified tracker -->
+        <div class="card">
+          <h3>Gamified Skill Tracker</h3>
+          <div class="sub">Earn XP for adding skills and actions. Unlock badges.</div>
+
+          <div style="display:flex;gap:12px;margin-top:10px;align-items:center">
+            <div class="avatar" id="avatar">CP</div>
+            <div style="flex:1">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div style="font-weight:700;color:white" id="profileName">Student</div>
+                <div style="font-weight:800;color:white" id="xpDisplay">0 XP</div>
+              </div>
+              <div style="height:8px"></div>
+              <div class="progress"><i id="xpBar" style="width:10%"></i></div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn btn-primary tiny" id="miniQuizBtn">Complete Mini Quiz (+25 XP)</button>
+            <button class="btn btn-ghost tiny" id="manualXpBtn">+10 XP</button>
+            <button class="btn btn-ghost tiny" id="claimBadgeBtn">Claim Badge</button>
+          </div>
+
+          <div class="badges" id="badgesArea"></div>
+        </div>
+
+        <!-- Market insights -->
+        <div class="card">
+          <h3>Real-Time Market Insights (Mock)</h3>
+          <div class="sub">Trending roles and demand index (mock data) — animated for demo.</div>
+
+          <div class="market-grid">
+            <div><canvas id="demandLine" class="mini"></canvas></div>
+            <div>
+              <div style="font-weight:700;color:white">Top Trending</div>
+              <div class="muted" id="trendingList" style="margin-top:8px">—</div>
+              <div style="height:12px"></div>
+              <div style="font-weight:700;color:white;margin-top:8px">Salaries (avg)</div>
+              <div class="muted" id="salaryList" style="margin-top:8px">—</div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Sidebar -->
+      <aside>
+        <div class="card">
+          <h3>Profile</h3>
+          <div class="sub">Save & share. Quick fill skills to speed demo.</div>
+
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="btn btn-primary tiny" id="saveBtn">Save</button>
+            <button class="btn btn-ghost tiny" id="loadBtn">Load</button>
+            <button class="btn btn-ghost tiny" id="resetBtn">Reset</button>
+          </div>
+
+          <div style="margin-top:12px">
+            <div class="small muted">Quick Fill</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+              <button class="chip" onclick="quickAdd('Python')">Python</button>
+              <button class="chip" onclick="quickAdd('SQL')">SQL</button>
+              <button class="chip" onclick="quickAdd('Machine Learning')">ML</button>
+              <button class="chip" onclick="quickAdd('React')">React</button>
+              <button class="chip" onclick="quickAdd('Cloud')">Cloud</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h3>Demo Steps</h3>
+          <div class="sub" style="margin-top:6px">A quick 30s flow to show judges</div>
+          <ol style="color:var(--muted);margin-top:10px">
+            <li>Add 4+ skills</li>
+            <li>Auto pick best fit</li>
+            <li>Generate & export roadmap</li>
+          </ol>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h3>About</h3>
+          <div class="muted" style="margin-top:6px">Your Personal Career Advisor that helps you to choose the best for you !</div>
+        </div>
+      </aside>
+    </div>
+
+    <footer>Made for goal Achievers • CareerPrism • 2025</footer>
+  </div>
+
+<script>
+/* ==============================
+   Mock DB & initial state
+   ============================== */
+const DB = [
+  { id:'data-engineer', title:'Data Engineer', industry:'Data', required:['Python','SQL','Spark','Cloud'], salary:65000, demand:[62,66,69,74,80,85,91], desc:'Build high-scale ETL & pipelines.'},
+  { id:'ml-engineer', title:'Machine Learning Engineer', industry:'AI/ML', required:['Python','Machine Learning','TensorFlow','SQL'], salary:85000, demand:[60,63,68,74,81,86,92], desc:'Productionize ML models.'},
+  { id:'frontend', title:'Frontend Developer', industry:'Web', required:['JavaScript','React','HTML','CSS'], salary:70000, demand:[55,57,61,63,67,72,78], desc:'Design interactive UIs.'},
+  { id:'cloud-arch', title:'Cloud Architect', industry:'Cloud', required:['Cloud','DevOps','Security','Python'], salary:110000, demand:[50,54,59,65,71,77,83], desc:'Design cloud-native systems.'}
+];
+
+const STORAGE_KEY = 'career_prism_polished_v1';
+let state = {
+  name:'Student',
+  skills:['Communication','Problem Solving'],
+  roadmap:[],
+  xp:0,
+  badges:[],
+};
+
+/* Utilities */
+const $ = id => document.getElementById(id);
+const save = ()=> localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+const load = ()=>{
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(raw) state = JSON.parse(raw);
+  renderAll();
+  toast('Loaded saved profile');
+};
+
+/* Renderers */
+function renderAll(){
+  renderChips();
+  renderRadar();
+  renderCareers();
+  renderTimeline();
+  renderProfile();
+  renderMarket();
+}
+
+/* Skill chips */
+function renderChips(){
+  const c = $('skillChips'); c.innerHTML='';
+  state.skills.forEach(s=>{
+    const el = document.createElement('div'); el.className='chip';
+    el.innerHTML = `<span>${s}</span>`;
+    const x = document.createElement('span'); x.className='x'; x.textContent='✕';
+    x.onclick = (ev)=>{ ev.stopPropagation(); removeSkill(s); };
+    el.appendChild(x);
+    c.appendChild(el);
+  });
+  $('statSkills').textContent = state.skills.length + ' skills';
+  $('heroXp').textContent = state.xp + ' XP';
+}
+
+/* Add/remove */
+function addSkillFromInput(){
+  const v = $('skillInput').value.trim();
+  if(!v) return;
+  addSkill(v);
+  $('skillInput').value='';
+}
+function addSkill(skill){
+  if(state.skills.map(s=>s.toLowerCase()).includes(skill.toLowerCase())) { pulse('skillChips'); return; }
+  state.skills.push(skill);
+  giveXp(5);
+  renderChips();
+  animateAddSkill();
+}
+function removeSkill(skill){
+  state.skills = state.skills.filter(s=>s!==skill);
+  renderChips();
+}
+
+/* Quick add */
+function quickAdd(s){ addSkill(s); }
+
+/* Radar chart (skill categories) */
+let radarChart=null;
+function renderRadar(){
+  const cats = ['Programming','Data','Cloud','Design','Soft'];
+  const mapping = {
+    Programming:['Python','JavaScript','React','HTML','CSS','TypeScript'],
+    Data:['SQL','Spark','Pandas','Tableau','Power BI','Data Engineering','Machine Learning'],
+    Cloud:['Cloud','AWS','GCP','Azure','Kubernetes','DevOps'],
+    Design:['UI','UX','Figma','Design'],
+    Soft:['Communication','Leadership','Problem Solving','Teamwork']
+  };
+  const vals = cats.map(cat => mapping[cat].filter(x => state.skills.map(s=>s.toLowerCase()).includes(x.toLowerCase())).length * 2 + 8);
+  const ctx = $('radarChart').getContext('2d');
+  if(radarChart){ radarChart.data.datasets[0].data = vals; radarChart.update(); } 
+  else {
+    radarChart = new Chart(ctx, {
+      type:'radar',
+      data:{ labels:cats, datasets:[{label:'Strength', data:vals, backgroundColor:'rgba(124,58,237,0.25)', borderColor:'#7c3aed', borderWidth:2, pointBackgroundColor:'#06b6d4'}] },
+      options:{ responsive:true, maintainAspectRatio:false, scales:{ r:{ grid:{color:'rgba(255,255,255,0.03)'}, ticks:{display:false} } }, plugins:{legend:{display:false}} }
+    });
+  }
+  // skill score
+  const score = Math.min(100, state.skills.length * 12);
+  $('skillScore').textContent = score + ' / 100';
+}
+
+/* Career recommendation rendering */
+function renderCareers(){
+  const container = $('careerList'); container.innerHTML='';
+  DB.forEach(c=>{
+    const have = c.required.filter(r => state.skills.map(s=>s.toLowerCase()).includes(r.toLowerCase())).length;
+    const pct = Math.round((have / c.required.length) * 100);
+    const el = document.createElement('div'); el.className='career';
+    el.innerHTML = `<div class="meta"><h4>${c.title}</h4><p class="muted">${c.desc}</p></div>
+      <div style="text-align:right">
+        <div class="pct">${pct}%</div>
+        <div class="sub muted2">${c.industry}</div>
+        <div style="height:8px"></div>
+        <button class="tiny btn-primary" onclick="selectCareer('${c.id}')">Select</button>
+      </div>`;
+    container.appendChild(el);
+  });
+}
+
+/* Select career -> generate roadmap */
+function selectCareer(id){
+  const role = DB.find(r=>r.id===id);
+  const missing = role.required.filter(r => !state.skills.map(s=>s.toLowerCase()).includes(r.toLowerCase()));
+  state.roadmap = [];
+  state.roadmap.push(`Understand the role: ${role.title}`);
+  missing.forEach((m,i)=> state.roadmap.push(`Week ${i+1}: Learn ${m}`));
+  state.roadmap.push('Build a small portfolio project');
+  state.roadmap.push('Mock interviews & resume polish');
+  renderTimeline();
+  giveXp(20);
+  toast('Roadmap generated for ' + role.title);
+}
+
+/* Timeline (horizontal) */
+function renderTimeline(){
+  const t = $('timeline'); t.innerHTML='';
+  state.roadmap.forEach((step, idx)=>{
+    const el = document.createElement('div'); el.className='step';
+    el.innerHTML = `<h4>Step ${idx+1}</h4><div class="muted2">${step}</div><div style="height:8px"></div>
+      <div style="display:flex;gap:8px"><button class="tiny btn-ghost" onclick="removeStep(${idx})">Remove</button></div>`;
+    t.appendChild(el);
+  });
+}
+function addRoadStep(){
+  const v = $('roadInput').value.trim();
+  if(!v) return;
+  state.roadmap.push(v);
+  $('roadInput').value='';
+  renderTimeline();
+  giveXp(5);
+}
+function removeStep(i){
+  state.roadmap.splice(i,1); renderTimeline();
+}
+function exportRoad(){
+  const blob = new Blob([JSON.stringify(state.roadmap,null,2)],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='roadmap.json'; a.click(); URL.revokeObjectURL(url);
+}
+
+/* Gamification */
+function renderProfile(){
+  $('xpDisplay').textContent = state.xp + ' XP';
+  $('xpBar').style.width = (state.xp % 100) + '%';
+  $('profileName').textContent = state.name;
+  $('badgesArea').innerHTML = '';
+  state.badges.forEach(b => {
+    const el = document.createElement('div'); el.className='badge'; el.textContent = b;
+    $('badgesArea').appendChild(el);
+  });
+}
+
+/* XP & badges */
+function giveXp(amount){
+  state.xp += amount;
+  if(state.xp >= 100 && !state.badges.includes('First 100 XP')) {
+    state.badges.push('First 100 XP');
+    toast('Badge unlocked: First 100 XP');
+  }
+  renderProfile();
+}
+
+/* Market insights */
+let demandChart = null;
+function renderMarket(){
+  const labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul'];
+  const datasets = DB.map((d, i) => ({ label:d.title, data:d.demand, borderWidth:2, fill:false, tension:0.35 }));
+  const ctx = $('demandLine').getContext('2d');
+  if(demandChart){ demandChart.data.datasets = datasets; demandChart.update(); } else {
+    demandChart = new Chart(ctx, { type:'line', data:{ labels, datasets }, options:{ maintainAspectRatio:false, plugins:{legend:{display:true,labels:{color:'#e6eef8'}}}, scales:{ x:{ ticks:{color:'#cbd5e1'} }, y:{ ticks:{color:'#cbd5e1'} } } } });
+  }
+  // top trending & salary
+  const sorted = DB.slice().sort((a,b)=> b.demand.slice(-1)[0] - a.demand.slice(-1)[0]);
+  $('trendingList').innerHTML = sorted.slice(0,3).map(s => `<div style="margin-top:8px"><strong style="color:white">${s.title}</strong><div class="muted">${s.industry} • demand ${s.demand.slice(-1)[0]}</div></div>`).join('');
+  $('salaryList').innerHTML = DB.map(s => `<div style="margin-top:8px"><strong style="color:white">${s.title}</strong><div class="muted">Avg $${(s.salary/1000).toFixed(1)}k</div></div>`).join('');
+  $('trendingMini').textContent = sorted[0].title;
+}
+
+/* Tiny UI helpers */
+function pulse(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  anime.remove(el); anime({targets:el, scale:[1,1.03,1], duration:600, easing:'easeInOutQuad'});
+}
+function animateAddSkill(){ pulse('skillChips'); }
+function toast(msg){
+  const t = document.createElement('div'); t.textContent=msg; t.style.position='fixed'; t.style.right='20px'; t.style.bottom='24px'; t.style.padding='10px 14px'; t.style.background='rgba(10,12,20,0.85)'; t.style.color='white'; t.style.borderRadius='10px'; t.style.zIndex=9999; t.style.boxShadow='0 8px 30px rgba(2,6,23,0.6)';
+  document.body.appendChild(t);
+  anime({ targets:t, translateY:[40,0], opacity:[0,1], duration:420, easing:'easeOutQuad' });
+  setTimeout(()=> anime({ targets:t, translateY:[0,40], opacity:[1,0], duration:420, easing:'easeInQuad', complete:()=> t.remove() }), 2200);
+}
+
+/* Wiring events */
+document.addEventListener('DOMContentLoaded', ()=>{
+  // initial render
+  renderAll();
+
+  // event listeners
+  $('addSkillBtn').addEventListener('click', addSkillFromInput);
+  $('skillInput').addEventListener('keydown', e=>{ if(e.key==='Enter') addSkillFromInput(); });
+  $('quickClearBtn').addEventListener('click', ()=>{ state.skills=[]; renderChips(); renderRadar(); renderCareers(); });
+  $('roadAddBtn').addEventListener('click', addRoadStep);
+  $('exportRoadBtn').addEventListener('click', exportRoad);
+  $('clearRoadBtn').addEventListener('click', ()=>{ state.roadmap=[]; renderTimeline(); });
+  $('miniQuizBtn').addEventListener('click', ()=>{ giveXp(25); toast('Mini-quiz completed +25 XP'); });
+  $('manualXpBtn').addEventListener('click', ()=>{ giveXp(10); });
+  $('claimBadgeBtn').addEventListener('click', ()=>{ if(!state.badges.includes('Hackathon Starter')){state.badges.push('Hackathon Starter'); renderProfile(); toast('Badge claimed!')} else toast('Badge already claimed'); });
+  $('saveBtn').addEventListener('click', ()=>{ save(); toast('Saved locally'); });
+  $('loadBtn').addEventListener('click', ()=>{ load(); });
+  $('resetBtn').addEventListener('click', ()=>{ if(confirm('Reset profile?')){ localStorage.removeItem(STORAGE_KEY); state = {name:'Student',skills:['Communication','Problem Solving'],roadmap:[],xp:0,badges:[]}; renderAll(); }});
+  $('saveBtn2').addEventListener('click', ()=>{ save(); toast('Saved locally'); });
+  $('loadBtn2').addEventListener('click', ()=>{ load(); });
+  $('resetBtn2').addEventListener('click', ()=>{ if(confirm('Reset profile?')){ localStorage.removeItem(STORAGE_KEY); state = {name:'Student',skills:['Communication','Problem Solving'],roadmap:[],xp:0,badges:[]}; renderAll(); }});
+  $('ctaStart').addEventListener('click', ()=>{ window.scrollTo({top:380, behavior:'smooth'}); });
+  $('autoPick').addEventListener('click', ()=>{
+    // pick best-fit role by matching count
+    const best = DB.map(c => ({c, score: c.required.filter(r=> state.skills.map(s=>s.toLowerCase()).includes(r.toLowerCase())).length })).sort((a,b)=> b.score - a.score)[0];
+    selectCareer(best.c.id);
+  });
+  $('exportJsonBtn').addEventListener('click', ()=>{
+    const data = JSON.stringify(DB.map(d => ({title:d.title,match:d.required.filter(r=> state.skills.map(s=>s.toLowerCase()).includes(r.toLowerCase())).length})), null, 2);
+    const blob = new Blob([data],{type:'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download='recommendations.json'; a.click(); URL.revokeObjectURL(url);
+  });
+  $('githubBtn').addEventListener('click', ()=>{ toast('Mock repo button — attach your GitHub link here'); });
+  $('startBtn').addEventListener('click', ()=>{ window.scrollTo({top:360,behavior:'smooth'}); });
+});
+
+/* load local storage on start if present */
+if(localStorage.getItem(STORAGE_KEY)) { load(); } else { renderAll(); }
+
+</script>
+</body>
+</html>
